@@ -1,0 +1,54 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35431.28
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SatelliteWallpaperUpdater", "SatelliteWallpaperUpdater\SatelliteWallpaperUpdater.csproj", "{96238A68-CC98-4E6D-93A8-246ADFF3934D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SatelliteWallpaperUpdater.Models", "SatelliteWallpaperUpdater.Models\SatelliteWallpaperUpdater.Models.csproj", "{A75331C5-FECE-4B9E-8C8A-6FDD12AA394E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SatelliteWallpaperUpdater.Repositories", "SatelliteWallpaperUpdater.Repositories\SatelliteWallpaperUpdater.Repositories.csproj", "{EBB08320-0A0B-44A5-B332-657D04E437CA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SatelliteWallpaperUpdater.Interfaces", "SatelliteWallpaperUpdater.Interfaces\SatelliteWallpaperUpdater.Interfaces.csproj", "{F6DD3F23-1E5B-4292-AC9C-ED1FBB4210CA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SatelliteWallpaperUpdater.Configuration", "SatelliteWallpaperUpdater.Configuration\SatelliteWallpaperUpdater.Configuration.csproj", "{EB20CEAF-89DE-4E12-994A-727DA2F6DBA5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{721EE852-DB97-41B1-8A44-ABE484AE7B4E}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{96238A68-CC98-4E6D-93A8-246ADFF3934D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{96238A68-CC98-4E6D-93A8-246ADFF3934D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{96238A68-CC98-4E6D-93A8-246ADFF3934D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{96238A68-CC98-4E6D-93A8-246ADFF3934D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A75331C5-FECE-4B9E-8C8A-6FDD12AA394E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A75331C5-FECE-4B9E-8C8A-6FDD12AA394E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A75331C5-FECE-4B9E-8C8A-6FDD12AA394E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A75331C5-FECE-4B9E-8C8A-6FDD12AA394E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EBB08320-0A0B-44A5-B332-657D04E437CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EBB08320-0A0B-44A5-B332-657D04E437CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EBB08320-0A0B-44A5-B332-657D04E437CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EBB08320-0A0B-44A5-B332-657D04E437CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6DD3F23-1E5B-4292-AC9C-ED1FBB4210CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6DD3F23-1E5B-4292-AC9C-ED1FBB4210CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6DD3F23-1E5B-4292-AC9C-ED1FBB4210CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6DD3F23-1E5B-4292-AC9C-ED1FBB4210CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB20CEAF-89DE-4E12-994A-727DA2F6DBA5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB20CEAF-89DE-4E12-994A-727DA2F6DBA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB20CEAF-89DE-4E12-994A-727DA2F6DBA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB20CEAF-89DE-4E12-994A-727DA2F6DBA5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {72F347D8-96AA-46EF-B0D0-B4650E1D4780}
+	EndGlobalSection
+EndGlobal

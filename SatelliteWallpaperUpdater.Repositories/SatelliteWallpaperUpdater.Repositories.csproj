@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.0" />
+    <PackageReference Include="System.Diagnostics.EventLog" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SatelliteWallpaperUpdater.Configuration\SatelliteWallpaperUpdater.Configuration.csproj" />
+    <ProjectReference Include="..\SatelliteWallpaperUpdater.Interfaces\SatelliteWallpaperUpdater.Interfaces.csproj" />
+    <ProjectReference Include="..\SatelliteWallpaperUpdater.Models\SatelliteWallpaperUpdater.Models.csproj" />
+  </ItemGroup>
+
+</Project>
