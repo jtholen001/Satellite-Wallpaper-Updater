@@ -1,3 +1,8 @@
+using Microsoft.Extensions.Options;
+using SatelliteWallpaperUpdater.Configuration;
+using SatelliteWallpaperUpdater.Forms;
+using SatelliteWallpaperUpdater.Models;
+
 namespace SatelliteWallpaperUpdater
 {
     public class MyApplicationContext : ApplicationContext
@@ -6,9 +11,17 @@ namespace SatelliteWallpaperUpdater
         private NotifyIcon TrayIcon;
         private ContextMenuStrip TrayIconContextMenu;
         private ToolStripMenuItem CloseMenuItem;
+        private SatelliteDesktopUpdateService updateService;
+        private SatelliteImageMetadata currentImage;
+        private IOptions<AppSettings> appSettings;
 
-        public MyApplicationContext()
+        public MyApplicationContext(SatelliteDesktopUpdateService satelliteDesktopUpdateService, IOptions<AppSettings> appSettings)
         {
+            updateService = satelliteDesktopUpdateService;
+            this.appSettings = appSettings;
+            updateService.BackgroundUpdated += BackgroundUpdated;
+            updateService.Start();
+
             Application.ApplicationExit += new EventHandler(this.OnApplicationExit);
             InitializeComponent();
             TrayIcon.Visible = true;
@@ -22,10 +35,8 @@ namespace SatelliteWallpaperUpdater
             TrayIcon.BalloonTipText =
               "I noticed that you double-clicked me! What can I do for you?";
             TrayIcon.BalloonTipTitle = "You called Master?";
-            TrayIcon.Text = "My fabulous tray icon demo application";
+            TrayIcon.Text = "Satellite Wallpaper Updater";
 
-            //The icon is added to the project resources.
-            //Here, I assume that the name of the file is 'TrayIcon.ico'
             TrayIcon.Icon = new Icon(new MemoryStream(Resources.front_right));
 
             //Optional - handle doubleclicks on the icon:
@@ -59,12 +70,15 @@ namespace SatelliteWallpaperUpdater
         {
             //Cleanup so that the icon will be removed when the application is closed
             TrayIcon.Visible = false;
+            TrayIcon.Dispose();
         }
 
         private void TrayIcon_DoubleClick(object sender, EventArgs e)
         {
             //Here, you can do stuff if the tray icon is doubleclicked
             TrayIcon.ShowBalloonTip(10000);
+
+            new ImageViewerForm(updateService, currentImage, appSettings).Show();
         }
 
         private void CloseMenuItem_Click(object sender, EventArgs e)
@@ -74,6 +88,14 @@ namespace SatelliteWallpaperUpdater
                     MessageBoxDefaultButton.Button2) == DialogResult.Yes)
             {
                 Application.Exit();
+            }
+        }
+
+        private void BackgroundUpdated(object sender, BackgroundUpdatedEventArgs e)
+        {
+            if (e.SatelliteImageMetadata != null)
+            {
+                currentImage = e.SatelliteImageMetadata;
             }
         }
     }

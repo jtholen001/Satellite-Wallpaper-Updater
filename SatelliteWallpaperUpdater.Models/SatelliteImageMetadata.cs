@@ -3,9 +3,11 @@
     public class SatelliteImageMetadata
     {
         /// <summary>
-        /// Fulle file name including the extension.
+        /// Full file name including the extension.
         /// </summary>
         public string FullFileName { get; }
+
+        public DateTime CreationDateTimeUtc { get; }
 
         /// <summary>
         /// Time the observation occured.
@@ -36,9 +38,10 @@
         /// Creates a SatelliteImage with the given parameters. 
         /// </summary>
         /// <exception cref="ArgumentException">If the given path does not exist, or if the specified file is not an image file</exception>
-        public SatelliteImageMetadata(DateTime observationDate, string fullFileName, string? satelliteName, string? instrument, string? sectorType, string? satelliteImageType)
+        public SatelliteImageMetadata(DateTime observationDate, DateTime creationDateTimeUtc, string fullFileName, string? satelliteName, string? instrument, string? sectorType, string? satelliteImageType)
         {
             ObservationDate = observationDate;
+            CreationDateTimeUtc = creationDateTimeUtc;
             FullFileName = fullFileName;
             SatelliteName = satelliteName;
             Instrument = instrument;
@@ -46,6 +49,6 @@
             SatelliteImageType = satelliteImageType;
         }
 
-        public SatelliteImageMetadata(DateTime observationDate, string fullFileName) : this(observationDate, fullFileName, null, null, null, null) { }
+        public SatelliteImageMetadata(DateTime observationDate, DateTime creationDateTimeUtc, string fullFileName) : this(observationDate, creationDateTimeUtc, fullFileName, null, null, null, null) { }
     }
 }

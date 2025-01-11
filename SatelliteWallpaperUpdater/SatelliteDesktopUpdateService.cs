@@ -1,7 +1,7 @@
-﻿using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SatelliteWallpaperUpdater.Configuration;
+using SatelliteWallpaperUpdater.Helpers;
 using SatelliteWallpaperUpdater.Interfaces.Repositories;
 using SatelliteWallpaperUpdater.Models;
 using SatelliteWallpaperUpdater.Repositories;
@@ -9,15 +9,16 @@ using System.Diagnostics;
 
 namespace SatelliteWallpaperUpdater
 {
-    public sealed class SatelliteDesktopUpdateService : BackgroundService
+    public class SatelliteDesktopUpdateService
     {
         private readonly ILogger<SatelliteDesktopUpdateService> _logger;
         private readonly IOptions<AppSettings> _appSettings;
         private readonly INESDISRepository _satImageRepo;
         private readonly IEventLogRepository _eventLogRepository;
+        public event EventHandler<BackgroundUpdatedEventArgs> BackgroundUpdated;
 
         public SatelliteDesktopUpdateService(
-            ILogger<SatelliteDesktopUpdateService> logger, 
+            ILogger<SatelliteDesktopUpdateService> logger,
             IOptions<AppSettings> appSettings,
             INESDISRepository satImageRepo,
             IEventLogRepository eventLogRepository)
@@ -28,58 +29,58 @@ namespace SatelliteWallpaperUpdater
             _eventLogRepository = eventLogRepository;
         }
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        public async Task Start()
         {
-            try
+            do
             {
-                while (!stoppingToken.IsCancellationRequested)
+                try
                 {
                     Stopwatch sw = Stopwatch.StartNew();
 
                     _logger.LogInformation("Updating Desktop background.");
 
-                    await UpdateDesktopBackgroundAsync();
+                    SatelliteImageMetadata? result = await UpdateDesktopBackgroundAsync();
+                    DateTime updatedDateTimeUtc = DateTime.UtcNow;
 
                     _eventLogRepository.WriteToEventLog($"Update complete! Time to update {sw.ElapsedMilliseconds}ms", EventLogEntryType.Information);
 
                     _logger.LogInformation("Update commplete! Time to update {0}ms", sw.ElapsedMilliseconds);
 
-                    await Task.Delay(TimeSpan.FromMinutes(10), stoppingToken);
-                }
-            }
-            catch (OperationCanceledException)
-            {
-                // When the stopping token is canceled, for example, a call made from services.msc,
-                // we shouldn't exit with a non-zero exit code. In other words, this is expected...
-            }
-            catch (Exception ex)
-            {
-                _eventLogRepository.WriteToEventLog($"Exception occured: {ex.Message}", EventLogEntryType.Error);
-                _logger.LogError(ex, "{Message}", ex.Message);
+                    BackgroundUpdatedEventArgs args = new BackgroundUpdatedEventArgs()
+                    {
+                        Exception = null,
+                        SatelliteImageMetadata = result,
+                        UpdatedDateTimeUtc = updatedDateTimeUtc
+                    };
 
-                // Terminates this process and returns an exit code to the operating system.
-                // This is required to avoid the 'BackgroundServiceExceptionBehavior', which
-                // performs one of two scenarios:
-                // 1. When set to "Ignore": will do nothing at all, errors cause zombie services.
-                // 2. When set to "StopHost": will cleanly stop the host, and log errors.
-                //
-                // In order for the Windows Service Management system to leverage configured
-                // recovery options, we need to terminate the process with a non-zero exit code.
-                Environment.Exit(1);
-            }
+                    OnBackgroundUpdated(args);
+
+                    await Task.Delay(TimeSpan.FromMinutes(10));
+                }
+                catch (Exception ex)
+                {
+                    _eventLogRepository.WriteToEventLog($"Exception occured: {ex.Message}", EventLogEntryType.Error);
+                    _logger.LogError(ex, "{Message}", ex.Message);
+                }
+            } while(true);
         }
 
-        private async Task<bool> UpdateDesktopBackgroundAsync()
+        protected virtual void OnBackgroundUpdated(BackgroundUpdatedEventArgs e)
+        {
+            BackgroundUpdated?.Invoke(this, e);
+        }
+
+        private async Task<SatelliteImageMetadata?> UpdateDesktopBackgroundAsync()
         {
             List<SatelliteImageMetadata> metadatas = await _satImageRepo.GetLatestImagesMetadataAsync();
 
 
-            if((metadatas?.Count ?? 0) == 0)
+            if ((metadatas?.Count ?? 0) == 0)
             {
                 _eventLogRepository.WriteToEventLog("Couldn't find images, this may be a transient error, or something has changed on the NESDIS site.", EventLogEntryType.Warning);
-                return false;
+                return null;
             }
-            string pathToSave = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures) + "\\SatelliteImageBackgrounds";
+            string pathToSave = FileHelper.GetSaveDirectory();
 
             if (!Directory.Exists(pathToSave))
             {
@@ -95,14 +96,22 @@ namespace SatelliteWallpaperUpdater
                 metadatas.Where(met => met.FullFileName.Contains("5424x5424")).First(),
                 pathToSave);
 
-            if(image?.FilePath == null)
+            if (image?.FilePath == null)
             {
                 _eventLogRepository.WriteToEventLog("Unable to get image from returned options.", EventLogEntryType.Warning);
-                return false;
+                return null;
             }
+
             WallPaperRepository.SetWallpaper(image.FilePath);
 
-            return true;
+            return image.Metadata;
         }
+    }
+
+    public class BackgroundUpdatedEventArgs : EventArgs
+    {
+        public SatelliteImageMetadata? SatelliteImageMetadata { get; set; }
+        public DateTime UpdatedDateTimeUtc { get; set; }
+        public Exception? Exception { get; set; }
     }
 }

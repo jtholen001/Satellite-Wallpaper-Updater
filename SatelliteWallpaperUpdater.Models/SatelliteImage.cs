@@ -26,7 +26,7 @@ namespace SatelliteWallpaperUpdater.Models
         /// Creates a SatelliteImage with the given parameters. 
         /// </summary>
         /// <exception cref="ArgumentException">If the given path does not exist, or if the specified file is not an image file</exception>
-        public SatelliteImage(string? path, DateTime observationDate, string? satelliteName, string? instrument, string? sectorType, string? satelliteImageType)
+        public SatelliteImage(string? path, DateTime observationDate, DateTime creationDateTimeUtc, string? satelliteName, string? instrument, string? sectorType, string? satelliteImageType)
         {
             if (!Path.Exists(path))
             {
@@ -35,10 +35,10 @@ namespace SatelliteWallpaperUpdater.Models
 
             FilePath = path;
             Image = Image.FromFile(path);
-            Metadata = new SatelliteImageMetadata(observationDate, Path.GetFileName(path), satelliteName, instrument, sectorType, satelliteImageType);
+            Metadata = new SatelliteImageMetadata(observationDate, creationDateTimeUtc, Path.GetFileName(path), satelliteName, instrument, sectorType, satelliteImageType);
         }
 
-        public SatelliteImage(string? path, DateTime observationDate) : this(path, observationDate, null, null, null, null) { }
+        public SatelliteImage(string? path, DateTime observationDate, DateTime creationDateTimeUtc) : this(path, observationDate, creationDateTimeUtc, null, null, null, null) { }
 
         /// <summary>
         /// Creates a SatelliteImage with the given parameters. 

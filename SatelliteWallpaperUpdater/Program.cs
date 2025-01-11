@@ -6,8 +6,6 @@ using SatelliteWallpaperUpdater.Repositories.Mappers;
 using SatelliteWallpaperUpdater.Repositories;
 using SatelliteWallpaperUpdater.Configuration;
 using Microsoft.Extensions.Configuration;
-using System.Reflection;
-using System.Runtime.CompilerServices;
 
 namespace SatelliteWallpaperUpdater
 {
@@ -16,7 +14,6 @@ namespace SatelliteWallpaperUpdater
         /// <summary>
         ///  The main entry point for the application.
         /// </summary>
-        [STAThread]
         static void Main()
         {
             // To customize application configuration such as set high DPI settings or default font,
@@ -26,9 +23,10 @@ namespace SatelliteWallpaperUpdater
                 .AddJsonFile("appsettings.json", optional: false)
                 .Build();
 
-            var builder = CreateHostBuilder(config).Build().RunAsync();
-
-            Application.Run(new MyApplicationContext());
+            //var builder = CreateHostBuilder(config).Build().RunAsync();
+            var host = CreateHostBuilder(config).Build();
+            Application.Run(host.Services.GetRequiredService<MyApplicationContext>());
+            //Application.Run(new MyApplicationContext());
         }
         static IHostBuilder CreateHostBuilder(IConfiguration config)
         {
@@ -39,7 +37,8 @@ namespace SatelliteWallpaperUpdater
                     services.Configure<AppSettings>(config.GetSection(nameof(AppSettings)));
 
                     // Services
-                    services.AddHostedService<SatelliteDesktopUpdateService>();
+                    services.AddSingleton<SatelliteDesktopUpdateService>();
+                    services.AddTransient<MyApplicationContext>();
 
                     // Repositories
                     services.AddTransient<INESDISRepository, NESDISRepository>();

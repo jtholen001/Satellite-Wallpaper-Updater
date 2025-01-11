@@ -33,6 +33,7 @@ namespace SatelliteWallpaperUpdater.Repositories.Mappers
 
                 return new SatelliteImageMetadata(
                     observationDate: observationDate,
+                    creationDateTimeUtc: DateTime.UtcNow,
                     fullFileName: fileName,
                     satelliteName: splitFileName[1],
                     instrument: splitFileName[2],
