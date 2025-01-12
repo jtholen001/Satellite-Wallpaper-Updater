@@ -4,7 +4,6 @@ using SatelliteWallpaperUpdater.Configuration;
 using SatelliteWallpaperUpdater.Helpers;
 using SatelliteWallpaperUpdater.Interfaces.Repositories;
 using SatelliteWallpaperUpdater.Models;
-using SatelliteWallpaperUpdater.Repositories;
 using System.Diagnostics;
 
 namespace SatelliteWallpaperUpdater
@@ -13,12 +12,14 @@ namespace SatelliteWallpaperUpdater
         ILogger<SatelliteDesktopUpdateService> logger,
         IOptions<AppSettings> appSettings,
         INESDISRepository satImageRepo,
-        IEventLogRepository eventLogRepository)
+        IEventLogRepository eventLogRepository,
+        IWallpaperRepository wallpaperRepository)
     {
         private readonly ILogger<SatelliteDesktopUpdateService> _logger = logger;
         private readonly IOptions<AppSettings> _appSettings = appSettings;
         private readonly INESDISRepository _satImageRepo = satImageRepo;
         private readonly IEventLogRepository _eventLogRepository = eventLogRepository;
+        private readonly IWallpaperRepository _wallpaperRepository = wallpaperRepository;
         public event EventHandler<BackgroundUpdatedEventArgs> BackgroundUpdated;
 
         public async Task UpdateBackgroundAsync()
@@ -89,7 +90,7 @@ namespace SatelliteWallpaperUpdater
                 return null;
             }
 
-            WallPaperRepository.SetWallpaper(image.FilePath, appSettings.Value.ApplicationName);
+            _wallpaperRepository.SetWallpaper(image.FilePath);
 
             return image.Metadata;
         }

@@ -1,4 +1,6 @@
-﻿using SatelliteWallpaperUpdater.Interfaces.Repositories;
+﻿using Polly;
+using Polly.Retry;
+using SatelliteWallpaperUpdater.Interfaces.Repositories;
 using SatelliteWallpaperUpdater.Interfaces.Repositories.Mappers;
 using SatelliteWallpaperUpdater.Models;
 using System.Text.RegularExpressions;
@@ -9,6 +11,7 @@ namespace SatelliteWallpaperUpdater.Repositories
     {
         private readonly HttpClient _httpClient;
         private readonly IGOES16GeoColorMetadataMapper _goes16MetadataMapper;
+        ResiliencePipeline _retryPolicy;
 
         //TODO make this config driven so if things change on the satellite it can be easily replaced
         private const string BaseFileName = "_GOES16-ABI-FD-GEOCOLOR-";
@@ -18,11 +21,22 @@ namespace SatelliteWallpaperUpdater.Repositories
         {
             _httpClient = new HttpClient();
             _goes16MetadataMapper = goes16MetadataMapper;
-        }
+            _retryPolicy = new ResiliencePipelineBuilder()
+                .AddRetry(new RetryStrategyOptions()
+                {
+                    MaxRetryAttempts = 5,
+                    Delay = TimeSpan.FromSeconds(10),
+                })
+                .Build();
+}
 
         public async Task<string> GetAvailableImagesAsync()
         {
-            var response = await _httpClient.GetAsync(BaseURI);
+            var response = await _retryPolicy.ExecuteAsync(async context =>
+            {
+                return await _httpClient.GetAsync(BaseURI);
+            });
+           
             return await response.Content.ReadAsStringAsync();
         }
 
@@ -30,7 +44,7 @@ namespace SatelliteWallpaperUpdater.Repositories
         {
             string path = $"{pathToSaveFile}\\{metadata.FullFileName}";
 
-            using (Stream request = await _httpClient.GetStreamAsync(BaseURI + metadata.FullFileName))
+            using (Stream request = await _retryPolicy.ExecuteAsync(async context => { return await _httpClient.GetStreamAsync(BaseURI + metadata.FullFileName); }))
             using (FileStream file = File.OpenWrite(path))
             {
                 request.CopyTo(file);

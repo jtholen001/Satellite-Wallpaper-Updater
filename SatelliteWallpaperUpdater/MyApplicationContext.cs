@@ -2,6 +2,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Win32;
 using SatelliteWallpaperUpdater.Configuration;
 using SatelliteWallpaperUpdater.Forms;
+using SatelliteWallpaperUpdater.Interfaces.Repositories;
 using SatelliteWallpaperUpdater.Models;
 
 namespace SatelliteWallpaperUpdater
@@ -15,18 +16,23 @@ namespace SatelliteWallpaperUpdater
         private SatelliteDesktopUpdateService updateService;
         private SatelliteImageMetadata currentImage;
         private IOptions<AppSettings> appSettings;
+        private IEventLogRepository eventLogRepository;
         private System.Timers.Timer timer;
 
-        public MyApplicationContext(SatelliteDesktopUpdateService satelliteDesktopUpdateService, IOptions<AppSettings> appSettings)
+        public MyApplicationContext(
+            SatelliteDesktopUpdateService satelliteDesktopUpdateService, 
+            IOptions<AppSettings> appSettings,
+            IEventLogRepository eventLogRepository)
         {
             updateService = satelliteDesktopUpdateService;
             this.appSettings = appSettings;
+            this.eventLogRepository = eventLogRepository;
+
             updateService.BackgroundUpdated += BackgroundUpdated;
             updateService.UpdateBackgroundAsync().ConfigureAwait(true);
 
             Application.ApplicationExit += new EventHandler(this.OnApplicationExit);
             InitializeComponent();
-            TrayIcon.Visible = true;
             
             timer = new System.Timers.Timer(TimeSpan.FromMinutes(10));
             timer.Elapsed += OnTimerElapsed;
@@ -69,6 +75,7 @@ namespace SatelliteWallpaperUpdater
             this.CloseMenuItem.Click += new EventHandler(this.CloseMenuItem_Click);
 
             TrayIconContextMenu.ResumeLayout(false);
+            TrayIcon.Visible = true;
             TrayIcon.ContextMenuStrip = TrayIconContextMenu;
         }
 
@@ -107,15 +114,16 @@ namespace SatelliteWallpaperUpdater
         private void OnTimerElapsed(object sender, EventArgs e)
         {
             // update on the interval
-            updateService.UpdateBackgroundAsync().ConfigureAwait(true);
+            updateService.UpdateBackgroundAsync().ConfigureAwait(false);
         }
 
         private void PowerModeChanged(object sender, PowerModeChangedEventArgs e)
         {
+            eventLogRepository.WriteToEventLog("Power mode event captured from: " + e.Mode, System.Diagnostics.EventLogEntryType.Information);
             // if the computer has been asleep we should update since its likely way off of the current time.
             if(e.Mode == PowerModes.Resume)
             {
-                updateService.UpdateBackgroundAsync().ConfigureAwait(true);
+                updateService.UpdateBackgroundAsync().ConfigureAwait(false);
             }
         }
     }

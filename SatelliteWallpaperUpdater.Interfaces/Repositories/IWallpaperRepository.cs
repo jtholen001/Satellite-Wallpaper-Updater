@@ -2,5 +2,6 @@
 {
     public interface IWallpaperRepository
     {
+        public void SetWallpaper(string file);
     }
 }

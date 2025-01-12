@@ -43,6 +43,7 @@ namespace SatelliteWallpaperUpdater
                     // Repositories
                     services.AddTransient<INESDISRepository, NESDISRepository>();
                     services.AddTransient<IEventLogRepository, EventLogRepository>();
+                    services.AddTransient<IWallpaperRepository, WallPaperRepository>();
 
                     // Mappers
                     services.AddTransient<IGOES16GeoColorMetadataMapper, GOES16GeoColorMetadataMapper>();
