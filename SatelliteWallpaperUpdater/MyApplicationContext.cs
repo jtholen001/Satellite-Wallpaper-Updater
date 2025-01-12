@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Options;
+using Microsoft.Win32;
 using SatelliteWallpaperUpdater.Configuration;
 using SatelliteWallpaperUpdater.Forms;
 using SatelliteWallpaperUpdater.Models;
@@ -14,17 +15,25 @@ namespace SatelliteWallpaperUpdater
         private SatelliteDesktopUpdateService updateService;
         private SatelliteImageMetadata currentImage;
         private IOptions<AppSettings> appSettings;
+        private System.Timers.Timer timer;
 
         public MyApplicationContext(SatelliteDesktopUpdateService satelliteDesktopUpdateService, IOptions<AppSettings> appSettings)
         {
             updateService = satelliteDesktopUpdateService;
             this.appSettings = appSettings;
             updateService.BackgroundUpdated += BackgroundUpdated;
-            updateService.Start();
+            updateService.UpdateBackgroundAsync().ConfigureAwait(true);
 
             Application.ApplicationExit += new EventHandler(this.OnApplicationExit);
             InitializeComponent();
             TrayIcon.Visible = true;
+            
+            timer = new System.Timers.Timer(TimeSpan.FromMinutes(10));
+            timer.Elapsed += OnTimerElapsed;
+            timer.Enabled = true;
+            timer.AutoReset = true;
+
+            SystemEvents.PowerModeChanged += PowerModeChanged;
         }
 
         private void InitializeComponent()
@@ -32,9 +41,6 @@ namespace SatelliteWallpaperUpdater
             TrayIcon = new NotifyIcon();
 
             TrayIcon.BalloonTipIcon = ToolTipIcon.Info;
-            TrayIcon.BalloonTipText =
-              "I noticed that you double-clicked me! What can I do for you?";
-            TrayIcon.BalloonTipTitle = "You called Master?";
             TrayIcon.Text = "Satellite Wallpaper Updater";
 
             TrayIcon.Icon = new Icon(new MemoryStream(Resources.front_right));
@@ -71,13 +77,12 @@ namespace SatelliteWallpaperUpdater
             //Cleanup so that the icon will be removed when the application is closed
             TrayIcon.Visible = false;
             TrayIcon.Dispose();
+            timer.Dispose();
+            SystemEvents.PowerModeChanged -= PowerModeChanged;
         }
 
         private void TrayIcon_DoubleClick(object sender, EventArgs e)
         {
-            //Here, you can do stuff if the tray icon is doubleclicked
-            TrayIcon.ShowBalloonTip(10000);
-
             new ImageViewerForm(updateService, currentImage, appSettings).Show();
         }
 
@@ -96,6 +101,21 @@ namespace SatelliteWallpaperUpdater
             if (e.SatelliteImageMetadata != null)
             {
                 currentImage = e.SatelliteImageMetadata;
+            }
+        }
+
+        private void OnTimerElapsed(object sender, EventArgs e)
+        {
+            // update on the interval
+            updateService.UpdateBackgroundAsync().ConfigureAwait(true);
+        }
+
+        private void PowerModeChanged(object sender, PowerModeChangedEventArgs e)
+        {
+            // if the computer has been asleep we should update since its likely way off of the current time.
+            if(e.Mode == PowerModes.Resume)
+            {
+                updateService.UpdateBackgroundAsync().ConfigureAwait(true);
             }
         }
     }

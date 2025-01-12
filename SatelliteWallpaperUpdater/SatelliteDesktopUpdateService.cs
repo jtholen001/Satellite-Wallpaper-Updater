@@ -9,60 +9,47 @@ using System.Diagnostics;
 
 namespace SatelliteWallpaperUpdater
 {
-    public class SatelliteDesktopUpdateService
+    public class SatelliteDesktopUpdateService(
+        ILogger<SatelliteDesktopUpdateService> logger,
+        IOptions<AppSettings> appSettings,
+        INESDISRepository satImageRepo,
+        IEventLogRepository eventLogRepository)
     {
-        private readonly ILogger<SatelliteDesktopUpdateService> _logger;
-        private readonly IOptions<AppSettings> _appSettings;
-        private readonly INESDISRepository _satImageRepo;
-        private readonly IEventLogRepository _eventLogRepository;
+        private readonly ILogger<SatelliteDesktopUpdateService> _logger = logger;
+        private readonly IOptions<AppSettings> _appSettings = appSettings;
+        private readonly INESDISRepository _satImageRepo = satImageRepo;
+        private readonly IEventLogRepository _eventLogRepository = eventLogRepository;
         public event EventHandler<BackgroundUpdatedEventArgs> BackgroundUpdated;
 
-        public SatelliteDesktopUpdateService(
-            ILogger<SatelliteDesktopUpdateService> logger,
-            IOptions<AppSettings> appSettings,
-            INESDISRepository satImageRepo,
-            IEventLogRepository eventLogRepository)
+        public async Task UpdateBackgroundAsync()
         {
-            _logger = logger;
-            _appSettings = appSettings;
-            _satImageRepo = satImageRepo;
-            _eventLogRepository = eventLogRepository;
-        }
-
-        public async Task Start()
-        {
-            do
+            try
             {
-                try
+                Stopwatch sw = Stopwatch.StartNew();
+
+                _logger.LogInformation("Updating Desktop background.");
+
+                SatelliteImageMetadata? result = await UpdateDesktopBackgroundAsync();
+                DateTime updatedDateTimeUtc = DateTime.UtcNow;
+
+                _eventLogRepository.WriteToEventLog($"Update complete! Time to update {sw.ElapsedMilliseconds}ms", EventLogEntryType.Information);
+
+                _logger.LogInformation("Update commplete! Time to update {0}ms", sw.ElapsedMilliseconds);
+
+                BackgroundUpdatedEventArgs args = new BackgroundUpdatedEventArgs()
                 {
-                    Stopwatch sw = Stopwatch.StartNew();
+                    Exception = null,
+                    SatelliteImageMetadata = result,
+                    UpdatedDateTimeUtc = updatedDateTimeUtc
+                };
 
-                    _logger.LogInformation("Updating Desktop background.");
-
-                    SatelliteImageMetadata? result = await UpdateDesktopBackgroundAsync();
-                    DateTime updatedDateTimeUtc = DateTime.UtcNow;
-
-                    _eventLogRepository.WriteToEventLog($"Update complete! Time to update {sw.ElapsedMilliseconds}ms", EventLogEntryType.Information);
-
-                    _logger.LogInformation("Update commplete! Time to update {0}ms", sw.ElapsedMilliseconds);
-
-                    BackgroundUpdatedEventArgs args = new BackgroundUpdatedEventArgs()
-                    {
-                        Exception = null,
-                        SatelliteImageMetadata = result,
-                        UpdatedDateTimeUtc = updatedDateTimeUtc
-                    };
-
-                    OnBackgroundUpdated(args);
-
-                    await Task.Delay(TimeSpan.FromMinutes(10));
-                }
-                catch (Exception ex)
-                {
-                    _eventLogRepository.WriteToEventLog($"Exception occured: {ex.Message}", EventLogEntryType.Error);
-                    _logger.LogError(ex, "{Message}", ex.Message);
-                }
-            } while(true);
+                OnBackgroundUpdated(args);
+            }
+            catch (Exception ex)
+            {
+                _eventLogRepository.WriteToEventLog($"Exception occured: {ex.Message}", EventLogEntryType.Error);
+                _logger.LogError(ex, "{Message}", ex.Message);
+            }
         }
 
         protected virtual void OnBackgroundUpdated(BackgroundUpdatedEventArgs e)
@@ -102,7 +89,7 @@ namespace SatelliteWallpaperUpdater
                 return null;
             }
 
-            WallPaperRepository.SetWallpaper(image.FilePath);
+            WallPaperRepository.SetWallpaper(image.FilePath, appSettings.Value.ApplicationName);
 
             return image.Metadata;
         }

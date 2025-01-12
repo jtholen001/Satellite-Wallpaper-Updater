@@ -13,7 +13,7 @@ namespace SatelliteWallpaperUpdater.Repositories
         private static readonly uint SPIF_UPDATEINIFILE = 0x01;
         private static readonly uint SPIF_SENDWININICHANGE = 0x02;
 
-        public static void SetWallpaper(string file)
+        public static void SetWallpaper(string file, string applicationName)
         {
             if (File.Exists(file))
             {
@@ -30,25 +30,28 @@ namespace SatelliteWallpaperUpdater.Repositories
 
                 if (result == 0)
                 {
-                    WriteToEventLog($"There was an error: {Marshal.GetLastWin32Error()}", EventLogEntryType.Error);
+                    WriteToEventLog($"There was an error: {Marshal.GetLastWin32Error()}", EventLogEntryType.Error, applicationName);
                     return;
                 }
 
-                WriteToEventLog($"Current User: {test.GetValue("USERNAME")}{Environment.NewLine} Result: {result}", EventLogEntryType.Information);
+                WriteToEventLog(
+                    $"Current User: {test.GetValue("USERNAME")}{Environment.NewLine} Result: {result}", 
+                    EventLogEntryType.Information,
+                    applicationName);
             }
         }
 
-        private static void WriteToEventLog(string message, EventLogEntryType type)
+        private static void WriteToEventLog(string message, EventLogEntryType type, string applicationName)
         {
-            if (!EventLog.SourceExists("Satellite Desktop Update Service"))
+            if (!EventLog.SourceExists(applicationName))
             {
-                EventLog.CreateEventSource("Satellite Desktop Update Service", "Application");
+                EventLog.CreateEventSource(applicationName, "Application");
             }
 
 
             using (EventLog eventLog = new("Application"))
             {
-                eventLog.Source = "Satellite Desktop Update Service";
+                eventLog.Source = applicationName;
                 eventLog.WriteEntry(message, type);
             }
         }

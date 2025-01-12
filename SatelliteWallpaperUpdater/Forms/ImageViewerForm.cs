@@ -29,11 +29,16 @@ namespace SatelliteWallpaperUpdater.Forms
 
         private void InitializeForm()
         {
+            this.Width = 512;
+            this.Height = 512;
+
             label1.AutoSize = false;
             label1.TextAlign = ContentAlignment.MiddleCenter;
             label1.Dock = DockStyle.Fill;
             label1.Width = this.Width - 10;
             label1.Text = LabelBaseText;
+
+            this.Icon = new Icon(new MemoryStream(Resources.front_right));
 
             this.Text = appSettings.Value.ApplicationName;
         }
