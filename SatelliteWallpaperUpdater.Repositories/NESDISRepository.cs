@@ -24,8 +24,19 @@ namespace SatelliteWallpaperUpdater.Repositories
             _retryPolicy = new ResiliencePipelineBuilder()
                 .AddRetry(new RetryStrategyOptions()
                 {
+                    ShouldHandle = new PredicateBuilder()
+                        .Handle<HttpRequestException>()
+                        .HandleResult(result =>
+                        {
+                            if (result?.GetType() == typeof(HttpResponseMessage))
+                            {
+                                return ((HttpResponseMessage)result).IsSuccessStatusCode == false;
+                            }
+                            return false;
+                        }),
                     MaxRetryAttempts = 5,
-                    Delay = TimeSpan.FromSeconds(10),
+                    BackoffType = DelayBackoffType.Linear,
+                    Delay = TimeSpan.FromSeconds(5),
                 })
                 .Build();
 }
@@ -64,7 +75,7 @@ namespace SatelliteWallpaperUpdater.Repositories
             List<SatelliteImageMetadata> imageMetadatas = new List<SatelliteImageMetadata>();
 
             // get the list of files then separate it into lines for parsing 
-            string availableFiles = await _httpClient.GetStringAsync(BaseURI);
+            string availableFiles = await _retryPolicy.ExecuteAsync(async context => { return await _httpClient.GetStringAsync(BaseURI); });
             string[] listOfFiles = availableFiles.Split('\n');
 
             /* This will look at the resulting html and match on >20243302100_GOES16-ABI-FD-GEOCOLOR-10848x10848.jpg<
