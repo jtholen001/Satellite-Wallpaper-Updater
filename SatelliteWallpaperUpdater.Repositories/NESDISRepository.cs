@@ -92,7 +92,6 @@ namespace SatelliteWallpaperUpdater.Repositories
 
             for (int i = listOfFiles.Length - 1; i >= 0; i--)
             {
-                var test = listOfFiles[i];
                 var match = regex.Match(listOfFiles[i]);
 
                 if (match.Success)
@@ -110,15 +109,6 @@ namespace SatelliteWallpaperUpdater.Repositories
             }
 
             return imageMetadatas.Where(metadata => metadata.ObservationDate == maxDate).ToList();
-        }
-
-        private string FileNameFromDesiredDate(DateTime date)
-        {
-            /// see http://cimss.ssec.wisc.edu/goes/ABI_File_Naming_Conventions.pdf for more details on this. 
-            /// The documentation isn't great for this specific branch of NOAA. Hence why we can't use an api like we could for weather
-            string DatePortion = $"{date.Year}{date.DayOfYear}{date.Hour}{date.Minute:D2}";
-
-            return DatePortion + BaseFileName + "5424x5424" + ".jpg";
         }
     }
 }

@@ -119,7 +119,6 @@ namespace SatelliteWallpaperUpdater
 
         private void PowerModeChanged(object sender, PowerModeChangedEventArgs e)
         {
-            eventLogRepository.WriteToEventLog("Power mode event captured from: " + e.Mode, System.Diagnostics.EventLogEntryType.Information);
             // if the computer has been asleep we should update since its likely way off of the current time.
             if(e.Mode == PowerModes.Resume)
             {
