@@ -15,7 +15,7 @@ namespace SatelliteWallpaperUpdater.Repositories
 
         //TODO make this config driven so if things change on the satellite it can be easily replaced
         private const string BaseFileName = "_GOES16-ABI-FD-GEOCOLOR-";
-        private readonly Uri BaseURI = new Uri("https://cdn.star.nesdis.noaa.gov/GOES16/ABI/FD/GEOCOLOR/");
+        private readonly Uri BaseURI = new Uri("https://cdn.star.nesdis.noaa.gov/GOES19/ABI/FD/GEOCOLOR/");
 
         public NESDISRepository(IGOES16GeoColorMetadataMapper goes16MetadataMapper)
         {
