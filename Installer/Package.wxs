@@ -2,8 +2,8 @@
   <Package Id="SatelliteWallpaperUpdater.Installer" Name="Satellite Wallpaper Updater" Manufacturer="Jordan Tholen" Version="0.1.0.0">
     <MajorUpgrade DowngradeErrorMessage="!(loc.DowngradeError)" />
 
-    <Feature Id="Main">
-      <ComponentGroupRef Id="AppComponents" />
+    <Feature Id="AppDirComponents">
+      <ComponentGroupRef Id="AppDirComponents" />
     </Feature>
   </Package>
 </Wix>
