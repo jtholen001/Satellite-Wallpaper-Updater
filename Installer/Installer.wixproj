@@ -1,0 +1,16 @@
+﻿<Project Sdk="WixToolset.Sdk/6.0.1">
+  <ItemGroup>
+    <HarvestDirectory Include="..\SatelliteWallpaperUpdater\bin\Release\net8.0-windows10.0.17763.0\publish\win-x86">
+      <ComponentGroupName>AppComponents</ComponentGroupName>
+      <DirectoryRefId>ApplicationFolder</DirectoryRefId>
+      <SuppressRootDirectory>true</SuppressRootDirectory>
+    </HarvestDirectory>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="WixToolset.Heat" Version="6.0.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SatelliteWallpaperUpdater\SatelliteWallpaperUpdater.csproj" />
+  </ItemGroup>
+</Project>
