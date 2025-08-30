@@ -401,3 +401,5 @@ FodyWeavers.xsd
 *.vsidx
 .vs/SatelliteWallpaperUpdater/v17/.suo
 *.pdb
+*.deploy
+/published

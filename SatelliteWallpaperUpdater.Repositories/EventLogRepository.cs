@@ -28,5 +28,17 @@ namespace SatelliteWallpaperUpdater.Repositories
                 eventLog.WriteEntry(message, type);
             }
         }
+
+        public bool EventLogSourceExists()
+        {
+            try 
+            {
+                return EventLog.SourceExists(_appSettings.Value.ApplicationName);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
     }
 }

@@ -4,6 +4,8 @@ namespace SatelliteWallpaperUpdater.Interfaces.Repositories
 {
     public interface IEventLogRepository
     {
-        void WriteToEventLog(string message, EventLogEntryType type);
+        public void WriteToEventLog(string message, EventLogEntryType type);
+
+        public bool EventLogSourceExists();
     }
 }

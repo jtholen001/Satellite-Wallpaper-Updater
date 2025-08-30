@@ -2,12 +2,13 @@ using Microsoft.Extensions.Options;
 using Microsoft.Win32;
 using SatelliteWallpaperUpdater.Configuration;
 using SatelliteWallpaperUpdater.Forms;
+using SatelliteWallpaperUpdater.Helpers;
 using SatelliteWallpaperUpdater.Interfaces.Repositories;
 using SatelliteWallpaperUpdater.Models;
 
 namespace SatelliteWallpaperUpdater
 {
-    public class MyApplicationContext : ApplicationContext
+    public class WallpaperAppContext : ApplicationContext
     {
         //Component declarations
         private NotifyIcon TrayIcon;
@@ -19,11 +20,15 @@ namespace SatelliteWallpaperUpdater
         private IEventLogRepository eventLogRepository;
         private System.Timers.Timer timer;
 
-        public MyApplicationContext(
-            SatelliteDesktopUpdateService satelliteDesktopUpdateService, 
+        public WallpaperAppContext(
+            SatelliteDesktopUpdateService satelliteDesktopUpdateService,
             IOptions<AppSettings> appSettings,
             IEventLogRepository eventLogRepository)
         {
+            // Set the application to run on startup
+            StartupHelper.SetStartUp();
+
+            // Initialize the update service and subscribe to the event
             updateService = satelliteDesktopUpdateService;
             this.appSettings = appSettings;
             this.eventLogRepository = eventLogRepository;
@@ -33,7 +38,7 @@ namespace SatelliteWallpaperUpdater
 
             Application.ApplicationExit += new EventHandler(this.OnApplicationExit);
             InitializeComponent();
-            
+
             timer = new System.Timers.Timer(TimeSpan.FromMinutes(10));
             timer.Elapsed += OnTimerElapsed;
             timer.Enabled = true;
@@ -44,17 +49,17 @@ namespace SatelliteWallpaperUpdater
 
         private void InitializeComponent()
         {
+            this.CheckLoggingAbility();
+
             TrayIcon = new NotifyIcon();
 
             TrayIcon.BalloonTipIcon = ToolTipIcon.Info;
-            TrayIcon.Text = "Satellite Wallpaper Updater";
+            TrayIcon.Text = appSettings.Value.ApplicationName;
 
             TrayIcon.Icon = new Icon(new MemoryStream(Resources.front_right));
 
-            //Optional - handle doubleclicks on the icon:
             TrayIcon.DoubleClick += TrayIcon_DoubleClick;
 
-            //Optional - Add a context menu to the TrayIcon:
             TrayIconContextMenu = new ContextMenuStrip();
             CloseMenuItem = new ToolStripMenuItem();
             TrayIconContextMenu.SuspendLayout();
@@ -66,12 +71,13 @@ namespace SatelliteWallpaperUpdater
             this.CloseMenuItem});
             this.TrayIconContextMenu.Name = "TrayIconContextMenu";
             this.TrayIconContextMenu.Size = new Size(153, 70);
+
             // 
             // CloseMenuItem
             // 
             this.CloseMenuItem.Name = "CloseMenuItem";
             this.CloseMenuItem.Size = new Size(152, 22);
-            this.CloseMenuItem.Text = "Close the tray icon program";
+            this.CloseMenuItem.Text = "Close the application";
             this.CloseMenuItem.Click += new EventHandler(this.CloseMenuItem_Click);
 
             TrayIconContextMenu.ResumeLayout(false);
@@ -95,8 +101,8 @@ namespace SatelliteWallpaperUpdater
 
         private void CloseMenuItem_Click(object sender, EventArgs e)
         {
-            if (MessageBox.Show("Do you really want to close me?",
-                    "Are you sure?", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation,
+            if (MessageBox.Show("Closing this will prevent updates to your wallpaper, are you sure?",
+                    $"Close {appSettings.Value.ApplicationName}?", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation,
                     MessageBoxDefaultButton.Button2) == DialogResult.Yes)
             {
                 Application.Exit();
@@ -120,9 +126,18 @@ namespace SatelliteWallpaperUpdater
         private void PowerModeChanged(object sender, PowerModeChangedEventArgs e)
         {
             // if the computer has been asleep we should update since its likely way off of the current time.
-            if(e.Mode == PowerModes.Resume)
+            if (e.Mode == PowerModes.Resume)
             {
                 updateService.UpdateBackgroundAsync().ConfigureAwait(false);
+            }
+        }
+
+        private void CheckLoggingAbility()
+        {
+            if (!StartupHelper.IsAdministrator()  && !eventLogRepository.EventLogSourceExists())
+            {
+                MessageBox.Show($"The application does not have the ability to write to the event log.",
+               "Please run the application in administrator mode to fix this.", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }
