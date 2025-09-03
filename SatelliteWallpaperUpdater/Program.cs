@@ -16,17 +16,13 @@ namespace SatelliteWallpaperUpdater
         /// </summary>
         static void Main()
         {
-            // To customize application configuration such as set high DPI settings or default font,
-            // see https://aka.ms/applicationconfiguration.
             IConfiguration config = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
+                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
                 .AddJsonFile("appsettings.json", optional: false)
                 .Build();
 
-            //var builder = CreateHostBuilder(config).Build().RunAsync();
             var host = CreateHostBuilder(config).Build();
-            Application.Run(host.Services.GetRequiredService<MyApplicationContext>());
-            //Application.Run(new MyApplicationContext());
+            Application.Run(host.Services.GetRequiredService<WallpaperAppContext>());
         }
         static IHostBuilder CreateHostBuilder(IConfiguration config)
         {
@@ -38,7 +34,7 @@ namespace SatelliteWallpaperUpdater
 
                     // Services
                     services.AddSingleton<SatelliteDesktopUpdateService>();
-                    services.AddTransient<MyApplicationContext>();
+                    services.AddTransient<WallpaperAppContext>();
 
                     // Repositories
                     services.AddTransient<INESDISRepository, NESDISRepository>();
