@@ -11,14 +11,18 @@ namespace SatelliteWallpaperUpdater.Helpers
             try
             {
                 string appName = Assembly.GetExecutingAssembly().GetName().Name;
-                string appPath = string.Concat(AppDomain.CurrentDomain.BaseDirectory, "\\", appName, ".appref-ms");
+                string appPath = string.Concat(
+                    Environment.GetFolderPath(Environment.SpecialFolder.Programs),
+                    "\\Satellite Wallpaper Updater\\Satellite Wallpaper Updater", ".appref-ms");
                 string keyName = @"Software\Microsoft\Windows\CurrentVersion\Run";
-                using var key = Registry.CurrentUser.OpenSubKey(keyName, true);
-                
+                using var key = Registry.CurrentUser.OpenSubKey(keyName, true);                
+
                 if (key != null)
                 {
                     key.SetValue(appName, appPath);
                 }
+
+                key.Close();
             }
             catch (Exception ex)
             {
