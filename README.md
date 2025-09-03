@@ -1,6 +1,6 @@
 # Satellite-Wallpaper-Updater
 
-[![.NET](https://github.com/jtholen001/Satellite-Wallpaper-Updater/actions/workflows/dotnet.yml/badge.svg)](https://github.com/jtholen001/Satellite-Wallpaper-Updater/actions/workflows/dotnet.yml)
+[![.NET](https://github.com/jtholen001/Satellite-Wallpaper-Updater/actions/workflows/dotnet.yml/badge.svg?branch=master)](https://github.com/jtholen001/Satellite-Wallpaper-Updater/actions/workflows/dotnet.yml)
 
 A lightweight Windows Forms application that runs in the system tray and automatically fetches the latest **full disk images of Earth** from **NESDIS GOES satellites**.
 
