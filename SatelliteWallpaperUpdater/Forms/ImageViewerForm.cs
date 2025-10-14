@@ -10,12 +10,12 @@ namespace SatelliteWallpaperUpdater.Forms
     {
         private readonly string LabelBaseText = "Current image below. Last update: ";
         private SatelliteDesktopUpdateService desktopUpdateService;
-        private SatelliteImageMetadata? currentBackground;
+        private SatelliteImage? currentBackground;
         private IOptions<AppSettings> appSettings;
 
         public ImageViewerForm(
             SatelliteDesktopUpdateService satelliteDesktopUpdateService,
-            SatelliteImageMetadata? currentImage,
+            SatelliteImage? currentImage,
             IOptions<AppSettings> appSettings)
         {
             currentBackground = currentImage;
@@ -46,14 +46,14 @@ namespace SatelliteWallpaperUpdater.Forms
         protected override void OnLoad(EventArgs e)
         {
             UpdateImage();
-            UpdateLabelText(currentBackground?.CreationDateTimeUtc.ToLocalTime());
+            UpdateLabelText(currentBackground?.Metadata?.CreationDateTimeUtc.ToLocalTime());
         }
 
         private void BackgroundUpdated(object sender, BackgroundUpdatedEventArgs e)
         {
-            if (e.SatelliteImageMetadata?.FullFileName != null)
+            if (e.SatelliteImage?.Metadata?.FullFileName != null)
             {
-                currentBackground = e.SatelliteImageMetadata;
+                currentBackground = e.SatelliteImage;
                 UpdateLabelText(e.UpdatedDateTimeUtc.ToLocalTime());
                 UpdateImage();
             }
@@ -78,28 +78,43 @@ namespace SatelliteWallpaperUpdater.Forms
 
         private void UpdateImage()
         {
-            if (currentBackground != null)
+            if (currentBackground?.FilePath != null)
             {
                 pictureBox1.BeginInvoke(new Action(() =>
                 {
-                    string fullPath = FileHelper.GetFilePathOfBackgroundImage(currentBackground.FullFileName);
-
-                    if (File.Exists(fullPath))
+                    if (File.Exists(currentBackground.FilePath))
                     {
-                        pictureBox1.ImageLocation = fullPath;
+                        pictureBox1.ImageLocation = currentBackground.FilePath;
                         pictureBox1.Refresh();
                     }
                 }));
             }
         }
 
-        protected override void OnClosing(CancelEventArgs e)
+        protected override void Dispose(bool disposing)
         {
-            base.OnClosing(e);
-            if (desktopUpdateService != null)
+            if (disposing)
             {
-                desktopUpdateService.BackgroundUpdated -= BackgroundUpdated;
+                components?.Dispose();
+
+                if (desktopUpdateService != null)
+                {
+                    desktopUpdateService.BackgroundUpdated -= BackgroundUpdated;
+                }
+                if (Icon != null)
+                {
+                    Icon.Dispose();
+                }
+                label1.Dispose();
+                pictureBox1.Dispose();
+                menuStrip1.Dispose();
+                fileToolStripMenuItem.Dispose();
+                setImageLocationToolStripMenuItem.Dispose();
             }
+            base.Dispose(disposing);
+
+            GC.Collect();
+            Console.WriteLine("test");
         }
 
         private void SetImageLocation_Clicked(object sender, EventArgs e)
@@ -113,9 +128,10 @@ namespace SatelliteWallpaperUpdater.Forms
                 DialogResult result = openFolder.ShowDialog(this);
                 
 
-                if(Directory.Exists(openFolder.SelectedPath))
+                if(result == DialogResult.OK && Directory.Exists(openFolder.SelectedPath))
                 {
-                    Properties.Settings.Default.BackgroundImageLocation = openFolder.SelectedPath;
+                    Properties.Settings.Default.BackgroundImageFolder = openFolder.SelectedPath;
+                    Properties.Settings.Default.Save();
                 }
             }
         }

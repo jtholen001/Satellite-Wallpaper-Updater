@@ -1,6 +1,4 @@
-﻿using System.Drawing;
-
-namespace SatelliteWallpaperUpdater.Models
+﻿namespace SatelliteWallpaperUpdater.Models
 {
     /// <summary>
     /// Class to store some
@@ -11,11 +9,6 @@ namespace SatelliteWallpaperUpdater.Models
         /// Metadata for the image.
         /// </summary>
         public SatelliteImageMetadata Metadata { get; }
-
-        /// <summary>
-        /// Image file to support resolution handling
-        /// </summary>
-        public Image Image { get; set; }
 
         /// <summary>
         /// Path to the image file.
@@ -34,7 +27,6 @@ namespace SatelliteWallpaperUpdater.Models
             }
 
             FilePath = path;
-            Image = Image.FromFile(path);
             Metadata = new SatelliteImageMetadata(observationDate, creationDateTimeUtc, Path.GetFileName(path), satelliteName, instrument, sectorType, satelliteImageType);
         }
 
@@ -52,7 +44,6 @@ namespace SatelliteWallpaperUpdater.Models
             }
 
             FilePath = filePath;
-            Image = Image.FromFile(filePath);
             Metadata = metadata;
         }
     }

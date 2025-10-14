@@ -5,6 +5,7 @@ using SatelliteWallpaperUpdater.Forms;
 using SatelliteWallpaperUpdater.Helpers;
 using SatelliteWallpaperUpdater.Interfaces.Repositories;
 using SatelliteWallpaperUpdater.Models;
+using System.ComponentModel;
 
 namespace SatelliteWallpaperUpdater
 {
@@ -17,8 +18,7 @@ namespace SatelliteWallpaperUpdater
         private readonly IOptions<AppSettings> appSettings;
         private readonly IEventLogRepository eventLogRepository;
         private readonly System.Timers.Timer timer;
-        private SatelliteImageMetadata? currentImage;
-        private Form? ImageForm;
+        private SatelliteImage? currentImage;
 
         public WallpaperAppContext(
             SatelliteDesktopUpdateService satelliteDesktopUpdateService,
@@ -45,10 +45,11 @@ namespace SatelliteWallpaperUpdater
             timer.AutoReset = true;
 
             updateService.BackgroundUpdated += BackgroundUpdated;
-            updateService.UpdateBackgroundAsync().ConfigureAwait(false);
+            updateService.UpdateBackgroundAsync(currentImage).ConfigureAwait(false);
 
             Application.ApplicationExit += new EventHandler(OnApplicationExit);
             SystemEvents.PowerModeChanged += PowerModeChanged;
+
             CheckLoggingAbility();
         }
 
@@ -91,8 +92,7 @@ namespace SatelliteWallpaperUpdater
 
         private void TrayIcon_DoubleClick(object? sender, EventArgs e)
         {
-            ImageForm = new ImageViewerForm(updateService, currentImage, appSettings);
-            ImageForm.Show();
+            new ImageViewerForm(updateService, currentImage, appSettings).Show();
         }
 
         private void CloseMenuItem_Click(object? sender, EventArgs e)
@@ -107,16 +107,16 @@ namespace SatelliteWallpaperUpdater
 
         private void BackgroundUpdated(object? sender, BackgroundUpdatedEventArgs e)
         {
-            if (e.SatelliteImageMetadata != null)
+            if (e.SatelliteImage != null)
             {
-                currentImage = e.SatelliteImageMetadata;
+                currentImage = e.SatelliteImage;
             }
         }
 
         private void OnTimerElapsed(object? sender, EventArgs e)
         {
             // update on the interval
-            updateService.UpdateBackgroundAsync().ConfigureAwait(false);
+            updateService.UpdateBackgroundAsync(currentImage).ConfigureAwait(false);
         }
 
         private void PowerModeChanged(object? sender, PowerModeChangedEventArgs e)
@@ -124,7 +124,7 @@ namespace SatelliteWallpaperUpdater
             // if the computer has been asleep we should update since its likely way off of the current time.
             if (e.Mode == PowerModes.Resume)
             {
-                updateService.UpdateBackgroundAsync().ConfigureAwait(false);
+                updateService.UpdateBackgroundAsync(currentImage).ConfigureAwait(false);
             }
         }
 

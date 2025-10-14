@@ -26,12 +26,24 @@ namespace SatelliteWallpaperUpdater.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string BackgroundImageLocation {
+        public string BackgroundImageFolder {
             get {
-                return ((string)(this["BackgroundImageLocation"]));
+                return ((string)(this["BackgroundImageFolder"]));
             }
             set {
-                this["BackgroundImageLocation"] = value;
+                this["BackgroundImageFolder"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LastImagePath {
+            get {
+                return ((string)(this["LastImagePath"]));
+            }
+            set {
+                this["LastImagePath"] = value;
             }
         }
     }
