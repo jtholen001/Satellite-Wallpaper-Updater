@@ -30,7 +30,11 @@
         {
             pictureBox1 = new PictureBox();
             label1 = new Label();
+            menuStrip1 = new MenuStrip();
+            fileToolStripMenuItem = new ToolStripMenuItem();
+            setImageLocationToolStripMenuItem = new ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
+            menuStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // pictureBox1
@@ -52,16 +56,44 @@
             label1.Size = new Size(0, 15);
             label1.TabIndex = 1;
             // 
-            // Form1
+            // menuStrip1
+            // 
+            menuStrip1.Items.AddRange(new ToolStripItem[] { fileToolStripMenuItem });
+            menuStrip1.Location = new Point(0, 0);
+            menuStrip1.Name = "menuStrip1";
+            menuStrip1.Size = new Size(860, 24);
+            menuStrip1.TabIndex = 2;
+            menuStrip1.Text = "menuStrip1";
+            // 
+            // fileToolStripMenuItem
+            // 
+            fileToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { setImageLocationToolStripMenuItem });
+            fileToolStripMenuItem.Name = "fileToolStripMenuItem";
+            fileToolStripMenuItem.Size = new Size(37, 20);
+            fileToolStripMenuItem.Text = "File";
+            // 
+            // setImageLocationToolStripMenuItem
+            // 
+            setImageLocationToolStripMenuItem.Name = "setImageLocationToolStripMenuItem";
+            setImageLocationToolStripMenuItem.Size = new Size(180, 22);
+            setImageLocationToolStripMenuItem.Text = "Set Image Location";
+            setImageLocationToolStripMenuItem.Click += SetImageLocation_Clicked;
+            // 
+            // ImageViewerForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(860, 488);
             Controls.Add(label1);
             Controls.Add(pictureBox1);
-            Name = "Form1";
+            Controls.Add(menuStrip1);
+            MainMenuStrip = menuStrip1;
+            Name = "ImageViewerForm";
             Text = "Form1";
+            Load += SetImageLocation_Clicked;
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
+            menuStrip1.ResumeLayout(false);
+            menuStrip1.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -70,5 +102,8 @@
 
         private PictureBox pictureBox1;
         private Label label1;
+        private MenuStrip menuStrip1;
+        private ToolStripMenuItem fileToolStripMenuItem;
+        private ToolStripMenuItem setImageLocationToolStripMenuItem;
     }
 }

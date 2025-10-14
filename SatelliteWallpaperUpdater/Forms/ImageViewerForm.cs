@@ -14,7 +14,7 @@ namespace SatelliteWallpaperUpdater.Forms
         private IOptions<AppSettings> appSettings;
 
         public ImageViewerForm(
-            SatelliteDesktopUpdateService satelliteDesktopUpdateService, 
+            SatelliteDesktopUpdateService satelliteDesktopUpdateService,
             SatelliteImageMetadata? currentImage,
             IOptions<AppSettings> appSettings)
         {
@@ -24,7 +24,7 @@ namespace SatelliteWallpaperUpdater.Forms
             InitializeForm();
             desktopUpdateService = satelliteDesktopUpdateService;
             desktopUpdateService.BackgroundUpdated += BackgroundUpdated;
-            
+
         }
 
         private void InitializeForm()
@@ -99,6 +99,24 @@ namespace SatelliteWallpaperUpdater.Forms
             if (desktopUpdateService != null)
             {
                 desktopUpdateService.BackgroundUpdated -= BackgroundUpdated;
+            }
+        }
+
+        private void SetImageLocation_Clicked(object sender, EventArgs e)
+        {
+            using (FolderBrowserDialog openFolder = new FolderBrowserDialog())
+            {
+                openFolder.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
+                openFolder.ShowNewFolderButton = true;
+                openFolder.ShowPinnedPlaces = true;
+                
+                DialogResult result = openFolder.ShowDialog(this);
+                
+
+                if(Directory.Exists(openFolder.SelectedPath))
+                {
+                    Properties.Settings.Default.BackgroundImageLocation = openFolder.SelectedPath;
+                }
             }
         }
     }
