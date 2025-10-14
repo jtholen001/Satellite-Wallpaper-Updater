@@ -53,7 +53,7 @@ Images are sourced from **[NESDIS (NOAA Satellite and Information Service)](http
 
 ## 📦 Roadmap
 
-* [ ] User-configurable download location
+* [X] User-configurable download location
 * [ ] Multi-resolution image support
 * [ ] Desktop wallpaper auto-update option
 	* Currently only triggered manually via the start menu, or on a computer restart (via startup apps).
