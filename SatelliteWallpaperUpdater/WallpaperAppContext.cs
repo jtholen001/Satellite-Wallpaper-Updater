@@ -53,11 +53,6 @@ namespace SatelliteWallpaperUpdater
             CheckLoggingAbility();
         }
 
-        private void ImageForm_FormClosing(object? sender, FormClosingEventArgs e)
-        {
-            Console.WriteLine("closing");
-        }
-
         private void InitializeComponent(AppSettings appSettings)
         {
             // TrayIcon

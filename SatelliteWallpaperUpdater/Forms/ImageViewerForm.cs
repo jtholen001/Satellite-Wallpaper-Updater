@@ -112,16 +112,13 @@ namespace SatelliteWallpaperUpdater.Forms
                 setImageLocationToolStripMenuItem.Dispose();
             }
             base.Dispose(disposing);
-
-            GC.Collect();
-            Console.WriteLine("test");
         }
 
         private void SetImageLocation_Clicked(object sender, EventArgs e)
         {
             using (FolderBrowserDialog openFolder = new FolderBrowserDialog())
             {
-                openFolder.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
+                openFolder.InitialDirectory = FileHelper.GetSaveDirectory();
                 openFolder.ShowNewFolderButton = true;
                 openFolder.ShowPinnedPlaces = true;
                 
