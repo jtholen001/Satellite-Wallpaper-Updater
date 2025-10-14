@@ -9,7 +9,13 @@
 
         public static string GetSaveDirectory()
         {
-            return Environment.GetFolderPath(Environment.SpecialFolder.MyPictures) + "\\SatelliteImageBackgrounds";
+            if(string.IsNullOrEmpty(Properties.Settings.Default.BackgroundImageFolder))
+            {
+                Properties.Settings.Default.BackgroundImageFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures) + "\\SatelliteImageBackgrounds";
+                Properties.Settings.Default.Save();
+            }
+
+            return Properties.Settings.Default.BackgroundImageFolder;
         }
     }
 }

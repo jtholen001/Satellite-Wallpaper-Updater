@@ -10,19 +10,17 @@ namespace SatelliteWallpaperUpdater
 {
     public class SatelliteDesktopUpdateService(
         ILogger<SatelliteDesktopUpdateService> logger,
-        IOptions<AppSettings> appSettings,
         INESDISRepository satImageRepo,
         IEventLogRepository eventLogRepository,
         IWallpaperRepository wallpaperRepository)
     {
         private readonly ILogger<SatelliteDesktopUpdateService> _logger = logger;
-        private readonly IOptions<AppSettings> _appSettings = appSettings;
         private readonly INESDISRepository _satImageRepo = satImageRepo;
         private readonly IEventLogRepository _eventLogRepository = eventLogRepository;
         private readonly IWallpaperRepository _wallpaperRepository = wallpaperRepository;
         public event EventHandler<BackgroundUpdatedEventArgs> BackgroundUpdated;
 
-        public async Task UpdateBackgroundAsync()
+        public async Task UpdateBackgroundAsync(SatelliteImage? currentImage)
         {
             try
             {
@@ -30,7 +28,7 @@ namespace SatelliteWallpaperUpdater
 
                 _logger.LogInformation("Updating Desktop background.");
 
-                SatelliteImageMetadata? result = await UpdateDesktopBackgroundAsync();
+                SatelliteImage? result = await UpdateDesktopBackgroundAsync(currentImage);
                 DateTime updatedDateTimeUtc = DateTime.UtcNow;
 
                 _eventLogRepository.WriteToEventLog($"Update complete! Time to update {sw.ElapsedMilliseconds}ms", EventLogEntryType.Information);
@@ -40,7 +38,7 @@ namespace SatelliteWallpaperUpdater
                 BackgroundUpdatedEventArgs args = new BackgroundUpdatedEventArgs()
                 {
                     Exception = null,
-                    SatelliteImageMetadata = result,
+                    SatelliteImage = result,
                     UpdatedDateTimeUtc = updatedDateTimeUtc
                 };
 
@@ -58,7 +56,7 @@ namespace SatelliteWallpaperUpdater
             BackgroundUpdated?.Invoke(this, e);
         }
 
-        private async Task<SatelliteImageMetadata?> UpdateDesktopBackgroundAsync()
+        private async Task<SatelliteImage?> UpdateDesktopBackgroundAsync(SatelliteImage? currentImage)
         {
             List<SatelliteImageMetadata> metadatas = await _satImageRepo.GetLatestImagesMetadataAsync();
 
@@ -75,10 +73,7 @@ namespace SatelliteWallpaperUpdater
                 Directory.CreateDirectory(pathToSave);
             }
 
-            foreach (string file in Directory.EnumerateFiles(pathToSave))
-            {
-                File.Delete(file);
-            }
+            AttemptToDeletePastImages(currentImage);
 
             SatelliteImage image = await _satImageRepo.GetImageAsync(
                 metadatas.Where(met => met.FullFileName.Contains("5424x5424")).First(),
@@ -91,14 +86,34 @@ namespace SatelliteWallpaperUpdater
             }
 
             _wallpaperRepository.SetWallpaper(image.FilePath);
+            
+            Properties.Settings.Default.LastImagePath = image.FilePath;
+            Properties.Settings.Default.Save();
 
-            return image.Metadata;
+            return image;
+        }
+
+        private bool AttemptToDeletePastImages(SatelliteImage? currentImage)
+        {
+            if (currentImage?.FilePath != null && File.Exists(currentImage.FilePath))
+            {
+                File.Delete(currentImage.FilePath);
+                return true;
+            }
+
+            if(!string.IsNullOrEmpty(Properties.Settings.Default.LastImagePath))
+            {
+                File.Delete(Properties.Settings.Default.LastImagePath);
+                return true;
+            }
+
+            return false;
         }
     }
 
     public class BackgroundUpdatedEventArgs : EventArgs
     {
-        public SatelliteImageMetadata? SatelliteImageMetadata { get; set; }
+        public SatelliteImage? SatelliteImage { get; set; }
         public DateTime UpdatedDateTimeUtc { get; set; }
         public Exception? Exception { get; set; }
     }
